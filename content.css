@@ -1,0 +1,59 @@
+/* ============================================================
+   Factures Cleaner - content.css
+   Styles injectés dans la page Lucca
+   ============================================================ */
+
+/* ── Boutons de tri dans les en-têtes de colonnes ── */
+
+.fc-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  padding: 2px 5px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 11px;
+  line-height: 1;
+  transition: all 0.15s ease;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.fc-sort-btn:hover {
+  background: rgba(0, 0, 0, 0.07);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #374151;
+}
+
+/* Colonne triée croissant */
+.fc-sort-btn.fc-sort-asc .fc-sort-icon::after {
+  content: '↑';
+  color: #f97316;
+  font-weight: bold;
+}
+
+.fc-sort-btn.fc-sort-asc .fc-sort-icon {
+  font-size: 0; /* masque le ⇅ par défaut */
+}
+
+/* Colonne triée décroissant */
+.fc-sort-btn.fc-sort-desc .fc-sort-icon::after {
+  content: '↓';
+  color: #f97316;
+  font-weight: bold;
+}
+
+.fc-sort-btn.fc-sort-desc .fc-sort-icon {
+  font-size: 0;
+}
+
+/* ── En-tête de colonne : empêche le retour à la ligne ── */
+
+table thead th {
+  white-space: nowrap;
+}
