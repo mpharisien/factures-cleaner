@@ -5,12 +5,12 @@
 
 //Toggle ON = afficher, toggle OFF = masquer
 const DEFAULT_SETTINGS = {
-  filterCloture: false,   // OFF par défaut = Clôturé masqué
-  filterAnnule: false,    // OFF par défaut = Annulé masqué
-  filterRefuse: false,    // OFF par défaut = Refusé masqué
-  filterEnCours: true,    // ON  par défaut = En cours affiché
-  filterApprouve: true,   // ON  par défaut = Approuvé affiché
-  filterApprouveFacturesCompletes: true, // ON = règle active (masque les DA approuvées + toutes factures)
+  filterCloture: true,   // ON par défaut, affiche les DA "Clôturé"
+  filterAnnule: true,    // ON par défaut, affiche les DA "Annulé"
+  filterRefuse: true,    // ON par défaut, affiche les DA "Refusé"
+  filterEnCours: true,    // ON  par défaut, affiche les DA "En cours"
+  filterApprouve: true,   // ON  par défaut, affiche les DA "Approuvé"
+  filterApprouveFacturesCompletes: false, // OFF par défaut, masque les DA approuvées qui ont toutes leurs factures
 };
  
 const TOGGLE_IDS = [
@@ -22,6 +22,24 @@ const TOGGLE_IDS = [
   'filterApprouveFacturesCompletes',
 ];
  
+// ── Afficher les compteurs ───────────────────────────────────
+
+function updateCounts(counts) {
+  if (!counts) return;
+  const map = {
+    filterCloture:                   counts.filterCloture,
+    filterAnnule:                    counts.filterAnnule,
+    filterRefuse:                    counts.filterRefuse,
+    filterEnCours:                   counts.filterEnCours,
+    filterApprouve:                  counts.filterApprouve,
+    filterApprouveFacturesCompletes: counts.filterApprouveFacturesCompletes,
+  };
+  Object.entries(map).forEach(([key, val]) => {
+    const el = document.getElementById(`count-${key}`);
+    if (el) el.textContent = val > 0 ? `(${val})` : '';
+  });
+}
+
 // ── Charger les préférences et remplir les toggles ───────────
  
 function loadAndRender() {
@@ -29,7 +47,7 @@ function loadAndRender() {
     const settings = result.facturesCleanerSettings
       ? { ...DEFAULT_SETTINGS, ...result.facturesCleanerSettings }
       : { ...DEFAULT_SETTINGS };
- 
+
     TOGGLE_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.checked = !!settings[id];
@@ -37,6 +55,18 @@ function loadAndRender() {
   });
 }
  
+// ── Demander les compteurs à content.js ─────────────────────
+
+function requestCounts() {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0]) return;
+    chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_COUNTS' }, (response) => {
+      if (chrome.runtime.lastError) return;
+      if (response && response.counts) updateCounts(response.counts);
+    });
+  });
+}
+
 // ── Lire l'état actuel des toggles ──────────────────────────
  
 function getCurrentSettings() {
@@ -59,7 +89,10 @@ function saveAndApply() {
     chrome.tabs.sendMessage(tabs[0].id, {
       type: 'UPDATE_SETTINGS',
       settings: settings,
-    }).catch(() => {});
+    }, (response) => {
+      if (chrome.runtime.lastError) return;
+      if (response && response.counts) updateCounts(response.counts);
+    });
   });
 }
  
@@ -75,6 +108,7 @@ function checkActivePage() {
     if (url.includes('ilucca.net/cleemy-procurement/purchases-mine')) {
       badge.textContent = '✅ Page Lucca active';
       badge.className = 'page-badge';
+      requestCounts();
     } else {
       badge.textContent = '⚠️ Ouvrez la page Lucca pour appliquer les filtres';
       badge.className = 'page-badge page-badge-inactive';

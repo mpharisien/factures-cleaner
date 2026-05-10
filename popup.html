@@ -22,28 +22,15 @@
 
     /* ── Header ── */
     .header {
-      background: linear-gradient(135deg, #f97316, #ea580c);
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      width: 100%;
+      display: block;
+      line-height: 0;
     }
 
-    .header-icon {
-      font-size: 20px;
-    }
-
-    .header-title {
-      color: white;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-
-    .header-subtitle {
-      color: rgba(255,255,255,0.8);
-      font-size: 11px;
-      margin-top: 1px;
+    .header img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     /* ── Sections ── */
@@ -79,6 +66,7 @@
       gap: 8px;
       color: #374151;
       font-size: 13px;
+      flex: 1;
     }
 
     .toggle-dot {
@@ -86,6 +74,12 @@
       height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
+    }
+
+    .toggle-count {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-left: 2px;
     }
 
     /* Couleurs des statuts */
@@ -203,18 +197,13 @@
       color: #991b1b;
       border-color: #fecaca;
     }
-
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header : bannière personnalisée -->
   <div class="header">
-    <div class="header-icon">🧹</div>
-    <div>
-      <div class="header-title">Factures Cleaner</div>
-      <div class="header-subtitle">Filtrage avancé des demandes d'achat Lucca</div>
-    </div>
+    <img src="icons/banniere.jpg" alt="Factures Cleaner" />
   </div>
 
   <!-- Statut de la page -->
@@ -230,6 +219,7 @@
       <label class="toggle-label">
         <span class="toggle-dot dot-cloture"></span>
         Clôturé
+        <span class="toggle-count" id="count-filterCloture"></span>
       </label>
       <label class="toggle-switch">
         <input type="checkbox" id="filterCloture" />
@@ -241,6 +231,7 @@
       <label class="toggle-label">
         <span class="toggle-dot dot-annule"></span>
         Annulé
+        <span class="toggle-count" id="count-filterAnnule"></span>
       </label>
       <label class="toggle-switch">
         <input type="checkbox" id="filterAnnule" />
@@ -252,6 +243,7 @@
       <label class="toggle-label">
         <span class="toggle-dot dot-refuse"></span>
         Refusé
+        <span class="toggle-count" id="count-filterRefuse"></span>
       </label>
       <label class="toggle-switch">
         <input type="checkbox" id="filterRefuse" />
@@ -263,6 +255,7 @@
       <label class="toggle-label">
         <span class="toggle-dot dot-encours"></span>
         En cours
+        <span class="toggle-count" id="count-filterEnCours"></span>
       </label>
       <label class="toggle-switch">
         <input type="checkbox" id="filterEnCours" />
@@ -274,6 +267,7 @@
       <label class="toggle-label">
         <span class="toggle-dot dot-approuve"></span>
         Approuvé
+        <span class="toggle-count" id="count-filterApprouve"></span>
       </label>
       <label class="toggle-switch">
         <input type="checkbox" id="filterApprouve" />
@@ -289,6 +283,7 @@
       <div class="toggle-row">
         <span class="toggle-label">
           Masquer les DA approuvées et qui ont toutes leurs factures
+          <span class="toggle-count" id="count-filterApprouveFacturesCompletes"></span>
         </span>
         <label class="toggle-switch">
           <input type="checkbox" id="filterApprouveFacturesCompletes" />

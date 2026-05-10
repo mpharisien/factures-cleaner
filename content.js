@@ -4,14 +4,12 @@
 // ============================================================
 
 const DEFAULT_SETTINGS = {
-  filterCloture: false,
-  filterAnnule: false,
-  filterRefuse: false,
+  filterCloture: true,
+  filterAnnule: true,
+  filterRefuse: true,
   filterEnCours: true,
   filterApprouve: true,
-  filterApprouveFacturesCompletes: true,
-  sortColumn: null,
-  sortDirection: null,
+  filterApprouveFacturesCompletes: false,
 };
  
 let currentSettings = { ...DEFAULT_SETTINGS };
@@ -39,10 +37,42 @@ function isFacturesComplete(row) {
   return f !== null && f.total > 0 && f.received === f.total;
 }
  
+// ── Calcul des compteurs par statut ─────────────────────────
+ 
+function computeCounts() {
+  const rows = document.querySelectorAll('table.indexTable tbody tr.indexTable-body-row');
+  const counts = {
+    filterCloture: 0,
+    filterAnnule: 0,
+    filterRefuse: 0,
+    filterEnCours: 0,
+    filterApprouve: 0,
+    filterApprouveFacturesCompletes: 0,
+    totalHidden: 0,
+    total: rows.length,
+  };
+ 
+  rows.forEach(row => {
+    const status = getStatusFromRow(row);
+    if (!status) return;
+ 
+    if (status === 'clôturé')  counts.filterCloture++;
+    if (status === 'annulé')   counts.filterAnnule++;
+    if (status === 'refusé')   counts.filterRefuse++;
+    if (status === 'en cours') counts.filterEnCours++;
+    if (status === 'approuvé') counts.filterApprouve++;
+    if (status === 'approuvé' && isFacturesComplete(row)) counts.filterApprouveFacturesCompletes++;
+  });
+ 
+  return counts;
+}
+ 
 // ── Application des filtres ──────────────────────────────────
  
 function applyFilters() {
   const rows = document.querySelectorAll('table.indexTable tbody tr.indexTable-body-row');
+  let totalHidden = 0;
+ 
   rows.forEach(row => {
     const status = getStatusFromRow(row);
     let shouldHide = false;
@@ -65,12 +95,39 @@ function applyFilters() {
     }
  
     row.style.display = shouldHide ? 'none' : '';
+    if (shouldHide) totalHidden++;
   });
+ 
+  updateBadge(totalHidden);
+  return totalHidden;
+}
+ 
+// ── Bandeau sur la page Lucca ────────────────────────────────
+ 
+function updateBadge(totalHidden) {
+  let badge = document.getElementById('fc-page-badge');
+ 
+  if (totalHidden === 0) {
+    if (badge) badge.remove();
+    return;
+  }
+ 
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.id = 'fc-page-badge';
+ 
+    // Injecter à droite du titre "Mes demandes d'achat"
+    const title = document.querySelector('h1, [class*="title"], [class*="heading"]');
+    if (title && title.parentNode) {
+      title.parentNode.insertBefore(badge, title.nextSibling);
+    }
+  }
+ 
+  badge.textContent = `🧹 Factures Cleaner masque ${totalHidden} demande${totalHidden > 1 ? 's' : ''}`;
 }
  
 // ── Tri des colonnes ─────────────────────────────────────────
  
-// On stocke le state de tri en dehors pour survivre aux re-injections
 let sortState = { column: null, direction: null };
  
 function getCellText(row, colIndex) {
@@ -95,13 +152,14 @@ function sortTable(colIndex) {
  
   const rows = Array.from(tbody.querySelectorAll('tr.indexTable-body-row'));
  
-  // Toggle direction si même colonne, sinon asc
   if (sortState.column === colIndex) {
     sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
   } else {
     sortState.column = colIndex;
     sortState.direction = 'asc';
   }
+ 
+  observer.disconnect();
  
   rows.sort((a, b) => {
     const va = parseForSort(getCellText(a, colIndex));
@@ -111,19 +169,11 @@ function sortTable(colIndex) {
     return 0;
   });
  
-  // Pause l'observer pendant le tri pour éviter la re-injection intempestive
-  observer.disconnect();
- 
   rows.forEach(row => tbody.appendChild(row));
- 
-  currentSettings.sortColumn = colIndex;
-  currentSettings.sortDirection = sortState.direction;
-  saveSettings();
  
   updateSortIndicators();
   applyFilters();
  
-  // Reprendre l'observation après le tri
   const target = document.querySelector('main') || document.body;
   observer.observe(target, { childList: true, subtree: true });
 }
@@ -142,7 +192,7 @@ function injectSortButtons() {
   if (!headers.length) return;
  
   headers.forEach((th, i) => {
-    // Ne pas réinjecter si déjà présent
+    if (i === headers.length - 1) return;
     if (th.querySelector('.fc-sort-btn')) return;
  
     const btn = document.createElement('button');
@@ -158,7 +208,6 @@ function injectSortButtons() {
     th.appendChild(btn);
   });
  
-  // Toujours restaurer les indicateurs visuels après injection
   updateSortIndicators();
 }
  
@@ -172,11 +221,6 @@ function loadSettings(callback) {
   chrome.storage.sync.get(['facturesCleanerSettings'], (result) => {
     if (result.facturesCleanerSettings) {
       currentSettings = { ...DEFAULT_SETTINGS, ...result.facturesCleanerSettings };
-      // Restaurer le state de tri depuis les settings sauvegardés
-      if (currentSettings.sortColumn !== null) {
-        sortState.column = currentSettings.sortColumn;
-        sortState.direction = currentSettings.sortDirection;
-      }
     }
     callback();
   });
@@ -189,10 +233,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     currentSettings = { ...currentSettings, ...message.settings };
     saveSettings();
     applyFilters();
-    sendResponse({ ok: true });
+    // Renvoyer les compteurs au popup
+    const counts = computeCounts();
+    sendResponse({ ok: true, counts });
   }
   if (message.type === 'GET_SETTINGS') {
     sendResponse({ settings: currentSettings });
+  }
+  if (message.type === 'GET_COUNTS') {
+    const counts = computeCounts();
+    sendResponse({ counts });
   }
   return true;
 });
