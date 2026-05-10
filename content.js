@@ -17,7 +17,6 @@ const DEFAULT_SETTINGS = {
 let currentSettings = { ...DEFAULT_SETTINGS };
  
 // ── Lecture du statut ────────────────────────────────────────
-// Lucca : <span class="statusBadge ..."><span ...> Approuvé </span></span>
  
 function getStatusFromRow(row) {
   const badge = row.querySelector('.statusBadge span');
@@ -26,7 +25,6 @@ function getStatusFromRow(row) {
 }
  
 // ── Lecture des factures reçues ──────────────────────────────
-// Lucca : <td class="... mod-cellReceivedInvoices"> 0/8 </td>
  
 function getFacturesFromRow(row) {
   const cell = row.querySelector('.mod-cellReceivedInvoices');
@@ -42,26 +40,20 @@ function isFacturesComplete(row) {
 }
  
 // ── Application des filtres ──────────────────────────────────
-// toggle OFF (false) = masquer ce statut
-// toggle ON  (true)  = afficher ce statut
  
 function applyFilters() {
   const rows = document.querySelectorAll('table.indexTable tbody tr.indexTable-body-row');
- 
   rows.forEach(row => {
     const status = getStatusFromRow(row);
     let shouldHide = false;
  
     if (status) {
-      // Si le toggle du statut est OFF → masquer
       if (status === 'clôturé'  && !currentSettings.filterCloture)  shouldHide = true;
       if (status === 'annulé'   && !currentSettings.filterAnnule)    shouldHide = true;
       if (status === 'refusé'   && !currentSettings.filterRefuse)    shouldHide = true;
       if (status === 'en cours' && !currentSettings.filterEnCours)   shouldHide = true;
       if (status === 'approuvé' && !currentSettings.filterApprouve)  shouldHide = true;
  
-      // Règle avancée : masquer les DA Approuvées avec toutes les factures reçues
-      // (cette règle s'applique EN PLUS, même si filterApprouve est ON)
       if (
         !shouldHide &&
         status === 'approuvé' &&
@@ -78,6 +70,7 @@ function applyFilters() {
  
 // ── Tri des colonnes ─────────────────────────────────────────
  
+// On stocke le state de tri en dehors pour survivre aux re-injections
 let sortState = { column: null, direction: null };
  
 function getCellText(row, colIndex) {
@@ -102,6 +95,7 @@ function sortTable(colIndex) {
  
   const rows = Array.from(tbody.querySelectorAll('tr.indexTable-body-row'));
  
+  // Toggle direction si même colonne, sinon asc
   if (sortState.column === colIndex) {
     sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
   } else {
@@ -117,13 +111,21 @@ function sortTable(colIndex) {
     return 0;
   });
  
+  // Pause l'observer pendant le tri pour éviter la re-injection intempestive
+  observer.disconnect();
+ 
   rows.forEach(row => tbody.appendChild(row));
  
   currentSettings.sortColumn = colIndex;
   currentSettings.sortDirection = sortState.direction;
   saveSettings();
+ 
   updateSortIndicators();
   applyFilters();
+ 
+  // Reprendre l'observation après le tri
+  const target = document.querySelector('main') || document.body;
+  observer.observe(target, { childList: true, subtree: true });
 }
  
 function updateSortIndicators() {
@@ -140,25 +142,24 @@ function injectSortButtons() {
   if (!headers.length) return;
  
   headers.forEach((th, i) => {
+    // Ne pas réinjecter si déjà présent
     if (th.querySelector('.fc-sort-btn')) return;
  
     const btn = document.createElement('button');
     btn.className = 'fc-sort-btn';
     btn.setAttribute('aria-label', 'Trier cette colonne');
-    btn.innerHTML = '<span class="fc-sort-icon">⇅</span>';
+    btn.innerHTML = '<span class="fc-sort-icon"></span>';
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       sortTable(i);
     });
  
     th.appendChild(btn);
   });
  
-  if (currentSettings.sortColumn !== null && currentSettings.sortDirection) {
-    sortState.column = currentSettings.sortColumn;
-    sortState.direction = currentSettings.sortDirection;
-    updateSortIndicators();
-  }
+  // Toujours restaurer les indicateurs visuels après injection
+  updateSortIndicators();
 }
  
 // ── Persistance ──────────────────────────────────────────────
@@ -171,6 +172,11 @@ function loadSettings(callback) {
   chrome.storage.sync.get(['facturesCleanerSettings'], (result) => {
     if (result.facturesCleanerSettings) {
       currentSettings = { ...DEFAULT_SETTINGS, ...result.facturesCleanerSettings };
+      // Restaurer le state de tri depuis les settings sauvegardés
+      if (currentSettings.sortColumn !== null) {
+        sortState.column = currentSettings.sortColumn;
+        sortState.direction = currentSettings.sortDirection;
+      }
     }
     callback();
   });
@@ -191,7 +197,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
  
-// ── Observation DOM (SPA Angular) ────────────────────────────
+// ── Observation DOM ──────────────────────────────────────────
  
 let debounceTimer = null;
  

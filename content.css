@@ -9,51 +9,57 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 6px;
-  padding: 2px 5px;
+  margin-left: 4px;
+  padding: 2px 4px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
   color: #9ca3af;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   transition: all 0.15s ease;
   vertical-align: middle;
-  position: relative;
-  top: -1px;
+  flex-shrink: 0;
+  min-width: 20px;
+  visibility: visible !important;
+  opacity: 0.4;
 }
-
+ 
 .fc-sort-btn:hover {
   background: rgba(0, 0, 0, 0.07);
   border-color: rgba(0, 0, 0, 0.12);
   color: #374151;
+  opacity: 1;
 }
-
-/* Colonne triée croissant */
-.fc-sort-btn.fc-sort-asc .fc-sort-icon::after {
-  content: '↑';
+ 
+/* Colonne triée — toujours visible et colorée */
+.fc-sort-btn.fc-sort-asc,
+.fc-sort-btn.fc-sort-desc {
+  opacity: 1;
   color: #f97316;
-  font-weight: bold;
+  border-color: #fed7aa;
+  background: #fff7ed;
 }
-
-.fc-sort-btn.fc-sort-asc .fc-sort-icon {
-  font-size: 0; /* masque le ⇅ par défaut */
+ 
+/* Icône selon direction */
+.fc-sort-btn .fc-sort-icon {
+  font-size: 12px;
+  display: inline-block;
 }
-
-/* Colonne triée décroissant */
-.fc-sort-btn.fc-sort-desc .fc-sort-icon::after {
-  content: '↓';
-  color: #f97316;
-  font-weight: bold;
+ 
+.fc-sort-btn.fc-sort-asc .fc-sort-icon::before  { content: '↑'; }
+.fc-sort-btn.fc-sort-desc .fc-sort-icon::before { content: '↓'; }
+.fc-sort-btn:not(.fc-sort-asc):not(.fc-sort-desc) .fc-sort-icon::before { content: '⇅'; }
+ 
+/* ── Empêcher les retours à la ligne dans les en-têtes ── */
+ 
+table.indexTable thead th {
+  white-space: nowrap !important;
 }
-
-.fc-sort-btn.fc-sort-desc .fc-sort-icon {
-  font-size: 0;
-}
-
-/* ── En-tête de colonne : empêche le retour à la ligne ── */
-
-table thead th {
-  white-space: nowrap;
+ 
+table.indexTable thead th > div {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
 }
