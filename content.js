@@ -4,12 +4,14 @@
 // ============================================================
 
 const DEFAULT_SETTINGS = {
-  filterCloture: true,
-  filterAnnule: true,
-  filterRefuse: true,
-  filterEnCours: true,
+  filterCloture: false,
+  filterAnnule: false,
+  filterRefuse: false,
+  filterEnCours: false,
   filterApprouve: true,
-  filterApprouveFacturesCompletes: false,
+  filterFacturesCompletes: true,
+  sortColumn: null,
+  sortDirection: null,
 };
  
 let currentSettings = { ...DEFAULT_SETTINGS };
@@ -34,12 +36,12 @@ function getFacturesFromRow(row) {
  
 function isFacturesComplete(row) {
   const f = getFacturesFromRow(row);
-  return f !== null && f.total > 0 && f.received === f.total;
+  return f !== null && f.total > 0 && f.received >= f.total;
 }
  
 // ── Calcul des compteurs par statut ─────────────────────────
  
-function computeCounts() {
+function computeStatusCounts() {
   const rows = document.querySelectorAll('table.indexTable tbody tr.indexTable-body-row');
   const counts = {
     filterCloture: 0,
@@ -47,7 +49,7 @@ function computeCounts() {
     filterRefuse: 0,
     filterEnCours: 0,
     filterApprouve: 0,
-    filterApprouveFacturesCompletes: 0,
+    filterFacturesCompletes: 0,
     totalHidden: 0,
     total: rows.length,
   };
@@ -61,7 +63,7 @@ function computeCounts() {
     if (status === 'refusé')   counts.filterRefuse++;
     if (status === 'en cours') counts.filterEnCours++;
     if (status === 'approuvé') counts.filterApprouve++;
-    if (status === 'approuvé' && isFacturesComplete(row)) counts.filterApprouveFacturesCompletes++;
+    if (status === 'approuvé' && isFacturesComplete(row)) counts.filterFacturesCompletes++;
   });
  
   return counts;
@@ -86,8 +88,7 @@ function applyFilters() {
  
       if (
         !shouldHide &&
-        status === 'approuvé' &&
-        currentSettings.filterApprouveFacturesCompletes &&
+        currentSettings.filterFacturesCompletes &&
         isFacturesComplete(row)
       ) {
         shouldHide = true;
@@ -98,13 +99,13 @@ function applyFilters() {
     if (shouldHide) totalHidden++;
   });
  
-  updateBadge(totalHidden);
+  updatePageBadge(totalHidden);
   return totalHidden;
 }
  
 // ── Bandeau sur la page Lucca ────────────────────────────────
  
-function updateBadge(totalHidden) {
+function updatePageBadge(totalHidden) {
   let badge = document.getElementById('fc-page-badge');
 
   if (totalHidden === 0) {
@@ -149,8 +150,10 @@ function updateBadge(totalHidden) {
   // Garder l'image, remplacer le texte
   badge.querySelectorAll(':not(img)').forEach(n => n.remove());
   // Supprimer les nœuds texte existants
-  [...badge.childNodes].filter(n => n.nodeType === Node.TEXT_NODE).forEach(n => n.remove());
-
+  [...badge.childNodes].forEach(n => {
+    if (n.nodeType !== Node.ELEMENT_NODE || n.tagName !== 'IMG') n.remove();
+  });
+  
   badge.appendChild(text);
 }
  
@@ -262,14 +265,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     saveSettings();
     applyFilters();
     // Renvoyer les compteurs au popup
-    const counts = computeCounts();
+    const counts = computeStatusCounts();
     sendResponse({ ok: true, counts });
   }
   if (message.type === 'GET_SETTINGS') {
     sendResponse({ settings: currentSettings });
   }
   if (message.type === 'GET_COUNTS') {
-    const counts = computeCounts();
+    const counts = computeStatusCounts();
     sendResponse({ counts });
   }
   return true;

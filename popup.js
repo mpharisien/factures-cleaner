@@ -5,12 +5,12 @@
 
 //Toggle ON = afficher, toggle OFF = masquer
 const DEFAULT_SETTINGS = {
-  filterCloture: true,   // ON par défaut, affiche les DA "Clôturé"
-  filterAnnule: true,    // ON par défaut, affiche les DA "Annulé"
-  filterRefuse: true,    // ON par défaut, affiche les DA "Refusé"
-  filterEnCours: true,    // ON  par défaut, affiche les DA "En cours"
-  filterApprouve: true,   // ON  par défaut, affiche les DA "Approuvé"
-  filterApprouveFacturesCompletes: false, // OFF par défaut, masque les DA approuvées qui ont toutes leurs factures
+  filterCloture: false,
+  filterAnnule: false,
+  filterRefuse: false,
+  filterEnCours: false,
+  filterApprouve: true,
+  filterFacturesCompletes: true, // masque les DA qui sont approuvées et qui ont toutes leurs factures
 };
  
 const TOGGLE_IDS = [
@@ -19,7 +19,7 @@ const TOGGLE_IDS = [
   'filterRefuse',
   'filterEnCours',
   'filterApprouve',
-  'filterApprouveFacturesCompletes',
+  'filterFacturesCompletes',
 ];
  
 // ── Afficher les compteurs ───────────────────────────────────
@@ -32,7 +32,7 @@ function updateCounts(counts) {
     filterRefuse:                    counts.filterRefuse,
     filterEnCours:                   counts.filterEnCours,
     filterApprouve:                  counts.filterApprouve,
-    filterApprouveFacturesCompletes: counts.filterApprouveFacturesCompletes,
+    filterFacturesCompletes:         counts.filterFacturesCompletes,
   };
   Object.entries(map).forEach(([key, val]) => {
     const el = document.getElementById(`count-${key}`);
