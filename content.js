@@ -106,24 +106,52 @@ function applyFilters() {
  
 function updateBadge(totalHidden) {
   let badge = document.getElementById('fc-page-badge');
- 
+
   if (totalHidden === 0) {
     if (badge) badge.remove();
     return;
   }
- 
+
   if (!badge) {
     badge = document.createElement('span');
     badge.id = 'fc-page-badge';
- 
-    // Injecter à droite du titre "Mes demandes d'achat"
-    const title = document.querySelector('h1, [class*="title"], [class*="heading"]');
+    badge.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: orange;
+      font-size: 1em;
+      margin-left: 12px;
+      font-weight: normal;
+      vertical-align: middle;
+    `;
+
+    const img = document.createElement('img');
+    img.src = chrome.runtime.getURL('icons/icon48.png');
+    img.style.cssText = `
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+    `;
+
+    badge.appendChild(img);
+
+    const title = document.querySelector('h1.pageHeader-content-title-content');
     if (title && title.parentNode) {
       title.parentNode.insertBefore(badge, title.nextSibling);
     }
   }
- 
-  badge.textContent = `🧹 Factures Cleaner masque ${totalHidden} demande${totalHidden > 1 ? 's' : ''}`;
+
+  const text = document.createTextNode(
+    ` Facture Cleaner masque ${totalHidden} demande${totalHidden > 1 ? 's' : ''}`
+  );
+
+  // Garder l'image, remplacer le texte
+  badge.querySelectorAll(':not(img)').forEach(n => n.remove());
+  // Supprimer les nœuds texte existants
+  [...badge.childNodes].filter(n => n.nodeType === Node.TEXT_NODE).forEach(n => n.remove());
+
+  badge.appendChild(text);
 }
  
 // ── Tri des colonnes ─────────────────────────────────────────
