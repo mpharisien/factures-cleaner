@@ -153,6 +153,8 @@
       font-size: 12px;
       color: #92400e;
       line-height: 1.4;
+      flex: 1;
+      margin-right: 12px;
     }
 
     /* ── Footer ── */
@@ -211,7 +213,7 @@
     <div class="header-icon">🧹</div>
     <div>
       <div class="header-title">Factures Cleaner</div>
-      <div class="header-subtitle">Filtres des demandes d'achat</div>
+      <div class="header-subtitle">Filtrage avancé des demandes d'achat Lucca</div>
     </div>
   </div>
 
@@ -222,7 +224,7 @@
     </div>
 
     <!-- Filtres Statut -->
-    <div class="section-title">Masquer par statut</div>
+    <div class="section-title">Afficher par statut</div>
 
     <div class="toggle-row">
       <label class="toggle-label">
@@ -285,11 +287,10 @@
     <div class="section-title">Règle avancée</div>
     <div class="combined-rule">
       <div class="toggle-row">
-        <label class="toggle-label">
-          <span class="toggle-dot dot-combined"></span>
-          Masquer si <strong>&nbsp;Approuvé&nbsp;</strong> + toutes les factures reçues
-        </label>
-        <label class="toggle-switch" style="margin-left:12px">
+        <span class="toggle-label">
+          Masquer les DA approuvées et qui ont toutes leurs factures
+        </span>
+        <label class="toggle-switch">
           <input type="checkbox" id="filterApprouveFacturesCompletes" />
           <span class="toggle-slider"></span>
         </label>
