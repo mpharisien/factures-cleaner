@@ -69,7 +69,7 @@ function computeStatusCounts() {
     if (status === 'clôturé')  counts.filterCloture++;
     if (status === 'annulé')   counts.filterAnnule++;
     if (status === 'refusé')   counts.filterRefuse++;
-    if (status === 'en cours') counts.filterApprobation++;
+    if (status === 'approbation en cours') counts.filterApprobation++;
     if (status === 'approuvé') counts.filterApprouve++;
     if (isFacturesComplete(row)) counts.filterFacturesCompletes++;
     
@@ -92,7 +92,7 @@ function applyFilters() {
       if (status === 'clôturé'  && !currentSettings.filterCloture)  shouldHide = true;
       if (status === 'annulé'   && !currentSettings.filterAnnule)    shouldHide = true;
       if (status === 'refusé'   && !currentSettings.filterRefuse)    shouldHide = true;
-      if (status === 'en cours' && !currentSettings.filterApprobation)   shouldHide = true;
+      if (status === 'approbation en cours' && !currentSettings.filterApprobation)   shouldHide = true;
       if (status === 'approuvé' && !currentSettings.filterApprouve)  shouldHide = true;
     }
 
