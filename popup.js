@@ -1,5 +1,5 @@
 // ============================================================
-// Factures Cleaner - popup.js
+// Factures Filter - popup.js
 // Gère l'interface du popup et la communication avec content.js
 // ============================================================
 
@@ -47,9 +47,9 @@ function updateCounts(counts) {
 // ── Charger les préférences et remplir les toggles ───────────
  
 function loadAndRender() {
-  chrome.storage.sync.get(['facturesCleanerSettings'], (result) => {
-    const settings = result.facturesCleanerSettings
-      ? { ...DEFAULT_SETTINGS, ...result.facturesCleanerSettings }
+  chrome.storage.sync.get(['facturesFilterSettings'], (result) => {
+    const settings = result.facturesFilterSettings
+      ? { ...DEFAULT_SETTINGS, ...result.facturesFilterSettings }
       : { ...DEFAULT_SETTINGS };
 
     TOGGLE_IDS.forEach(id => {
@@ -86,7 +86,7 @@ function getCurrentSettings() {
  
 function saveAndApply() {
   const settings = getCurrentSettings();
-  chrome.storage.sync.set({ facturesCleanerSettings: settings });
+  chrome.storage.sync.set({ facturesFilterSettings: settings });
  
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (!tabs[0]) return;
@@ -123,7 +123,7 @@ function checkActivePage() {
 // ── Réinitialiser ────────────────────────────────────────────
  
 function resetSettings() {
-  chrome.storage.sync.set({ facturesCleanerSettings: DEFAULT_SETTINGS }, () => {
+  chrome.storage.sync.set({ facturesFilterSettings: DEFAULT_SETTINGS }, () => {
     TOGGLE_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.checked = !!DEFAULT_SETTINGS[id];

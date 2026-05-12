@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Factures Cleaner",
-  "version": "1.0.0",
+  "name": "Factures Filter",
+  "version": "1.1.0",
   "description": "Filtre et trie les demandes d'achat sur Lucca. Préférences sauvegardées par utilisateur.",
   "permissions": [
     "storage"

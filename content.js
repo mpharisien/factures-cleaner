@@ -1,5 +1,5 @@
 // ============================================================
-// Factures Cleaner - content.js
+// Factures Filter - content.js
 // Filtres et tri pour la page Lucca "Mes demandes d'achat"
 // ============================================================
 
@@ -153,7 +153,7 @@ function updatePageBadge(totalHidden) {
   }
 
   const text = document.createTextNode(
-    ` Facture Cleaner masque ${totalHidden} demande${totalHidden > 1 ? 's' : ''}`
+    ` Factures Filter masque ${totalHidden} demande${totalHidden > 1 ? 's' : ''}`
   );
 
   // Garder l'image, remplacer le texte
@@ -254,13 +254,13 @@ function injectSortButtons() {
 // ── Persistance ──────────────────────────────────────────────
  
 function saveSettings() {
-  chrome.storage.sync.set({ facturesCleanerSettings: currentSettings });
+  chrome.storage.sync.set({ facturesFilterSettings: currentSettings });
 }
  
 function loadSettings(callback) {
-  chrome.storage.sync.get(['facturesCleanerSettings'], (result) => {
-    if (result.facturesCleanerSettings) {
-      currentSettings = { ...DEFAULT_SETTINGS, ...result.facturesCleanerSettings };
+  chrome.storage.sync.get(['facturesFilterSettings'], (result) => {
+    if (result.facturesFilterSettings) {
+      currentSettings = { ...DEFAULT_SETTINGS, ...result.facturesFilterSettings };
     }
     callback();
   });

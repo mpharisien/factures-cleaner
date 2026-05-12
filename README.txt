@@ -1,4 +1,4 @@
-FACTURES CLEANER - Installation
+FACTURES FILTER - Installation
 ================================
 
 1. Dézippe ce dossier où tu veux où tu veux sur ton ordinateur
@@ -9,7 +9,7 @@ FACTURES CLEANER - Installation
 
 4. Clique sur "Charger l'extension non empaquetée"
 
-5. Sélectionne le dossier "factures-cleaner"
+5. Sélectionne le dossier "factures-filter"
 
 L'extension est installée, penses à l'épingler
 
