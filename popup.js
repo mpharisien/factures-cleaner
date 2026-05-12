@@ -8,31 +8,35 @@ const DEFAULT_SETTINGS = {
   filterCloture: false,
   filterAnnule: false,
   filterRefuse: false,
-  filterEnCours: false,
+  filterApprobation: true,
   filterApprouve: true,
   filterFacturesCompletes: true, // masque les DA qui sont approuvées et qui ont toutes leurs factures
+  filterAbonnements: false,  // masque les DA qui ont plus d'une facture à déposer
 };
  
 const TOGGLE_IDS = [
   'filterCloture',
   'filterAnnule',
   'filterRefuse',
-  'filterEnCours',
+  'filterApprobation',
   'filterApprouve',
   'filterFacturesCompletes',
+  'filterAbonnements'
 ];
  
 // ── Afficher les compteurs ───────────────────────────────────
 
 function updateCounts(counts) {
   if (!counts) return;
+  console.log('counts reçus:', counts);
   const map = {
     filterCloture:                   counts.filterCloture,
     filterAnnule:                    counts.filterAnnule,
     filterRefuse:                    counts.filterRefuse,
-    filterEnCours:                   counts.filterEnCours,
+    filterApprobation:               counts.filterApprobation,
     filterApprouve:                  counts.filterApprouve,
     filterFacturesCompletes:         counts.filterFacturesCompletes,
+    filterAbonnements:               counts.filterAbonnements,
   };
   Object.entries(map).forEach(([key, val]) => {
     const el = document.getElementById(`count-${key}`);

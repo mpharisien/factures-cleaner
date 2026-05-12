@@ -254,11 +254,11 @@
     <div class="toggle-row">
       <label class="toggle-label">
         <span class="toggle-dot dot-encours"></span>
-        En cours
-        <span class="toggle-count" id="count-filterEnCours"></span>
+        Approbation en cours
+        <span class="toggle-count" id="count-filterApprobation"></span>
       </label>
       <label class="toggle-switch">
-        <input type="checkbox" id="filterEnCours" />
+        <input type="checkbox" id="filterApprobation" />
         <span class="toggle-slider"></span>
       </label>
     </div>
@@ -276,9 +276,9 @@
     </div>
   </div>
 
-  <!-- Règle combinée -->
+  <!-- Règles avancées -->
   <div class="section">
-    <div class="section-title">Règle avancée</div>
+    <div class="section-title">Règles avancées</div>
     <div class="combined-rule">
       <div class="toggle-row">
         <span class="toggle-label">
@@ -287,6 +287,19 @@
         </span>
         <label class="toggle-switch">
           <input type="checkbox" id="filterFacturesCompletes" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="combined-rule" style="margin-top: 8px;">
+      <div class="toggle-row">
+        <span class="toggle-label">
+          Masquer les DA qui attendent plusieurs factures
+          <span class="toggle-count" id="count-filterAbonnements"></span>
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="filterAbonnements" />
           <span class="toggle-slider"></span>
         </label>
       </div>

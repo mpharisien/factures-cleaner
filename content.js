@@ -7,9 +7,10 @@ const DEFAULT_SETTINGS = {
   filterCloture: false,
   filterAnnule: false,
   filterRefuse: false,
-  filterEnCours: false,
+  filterApprobation: true,
   filterApprouve: true,
-  filterFacturesCompletes: true,
+  filterFacturesCompletes: true, // DA qui ont toutes leurs factures reçues
+  filterAbonnements: false,  // DA qui ont plus d'une facture à déposer
   sortColumn: null,
   sortDirection: null,
 };
@@ -38,7 +39,12 @@ function isFacturesComplete(row) {
   const f = getFacturesFromRow(row);
   return f !== null && f.total > 0 && f.received >= f.total;
 }
- 
+
+function isAbonnement(row) {
+  const f = getFacturesFromRow(row);
+  return f !== null && f.total > 1;
+}
+
 // ── Calcul des compteurs par statut ─────────────────────────
  
 function computeStatusCounts() {
@@ -47,23 +53,26 @@ function computeStatusCounts() {
     filterCloture: 0,
     filterAnnule: 0,
     filterRefuse: 0,
-    filterEnCours: 0,
+    filterApprobation: 0,
     filterApprouve: 0,
     filterFacturesCompletes: 0,
+    filterAbonnements: 0,
     totalHidden: 0,
     total: rows.length,
   };
  
   rows.forEach(row => {
     const status = getStatusFromRow(row);
+    if (isAbonnement(row)) counts.filterAbonnements++;
     if (!status) return;
  
     if (status === 'clôturé')  counts.filterCloture++;
     if (status === 'annulé')   counts.filterAnnule++;
     if (status === 'refusé')   counts.filterRefuse++;
-    if (status === 'en cours') counts.filterEnCours++;
+    if (status === 'en cours') counts.filterApprobation++;
     if (status === 'approuvé') counts.filterApprouve++;
-    if (status === 'approuvé' && isFacturesComplete(row)) counts.filterFacturesCompletes++;
+    if (isFacturesComplete(row)) counts.filterFacturesCompletes++;
+    
   });
  
   return counts;
@@ -78,23 +87,23 @@ function applyFilters() {
   rows.forEach(row => {
     const status = getStatusFromRow(row);
     let shouldHide = false;
- 
+
     if (status) {
       if (status === 'clôturé'  && !currentSettings.filterCloture)  shouldHide = true;
       if (status === 'annulé'   && !currentSettings.filterAnnule)    shouldHide = true;
       if (status === 'refusé'   && !currentSettings.filterRefuse)    shouldHide = true;
-      if (status === 'en cours' && !currentSettings.filterEnCours)   shouldHide = true;
+      if (status === 'en cours' && !currentSettings.filterApprobation)   shouldHide = true;
       if (status === 'approuvé' && !currentSettings.filterApprouve)  shouldHide = true;
- 
-      if (
-        !shouldHide &&
-        currentSettings.filterFacturesCompletes &&
-        isFacturesComplete(row)
-      ) {
-        shouldHide = true;
-      }
     }
- 
+
+    if (!shouldHide && currentSettings.filterFacturesCompletes && isFacturesComplete(row)) {
+      shouldHide = true;
+    }
+
+    if (!shouldHide && currentSettings.filterAbonnements && isAbonnement(row)) {
+      shouldHide = true;
+    }
+
     row.style.display = shouldHide ? 'none' : '';
     if (shouldHide) totalHidden++;
   });
